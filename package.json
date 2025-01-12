@@ -5,6 +5,7 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "repository": "https://github.com/gezakerecsenyi/scrollomat",
   "files": [
     "dist"
   ],
@@ -12,7 +13,6 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsup"
   },
-  "private": true,
   "author": "Geza Kerecsenyi",
   "license": "ISC",
   "devDependencies": {

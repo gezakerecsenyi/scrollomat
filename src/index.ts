@@ -96,6 +96,9 @@ export default class Scrollomat {
 
         element.classList.add('scrollable');
         element.style.top = `200vh`;
+        element.style.width = '100vw';
+        element.style.position = 'absolute';
+        element.style.margin = '0';
 
         this.entries.push({
             element,
