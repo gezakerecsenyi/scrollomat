@@ -120,3 +120,39 @@ the syntax of `scroll-data` is explained in the following section, but find a fe
 The following options are available to use within `scroll-data`. In general, they can be arranged in any order, though
 note that `!absolute` _must_ be first if present, and `leave` will necessarily take precedence over `duration` if both 
 are present (though there is no legitimate usage in which this would be the case).
+
+ - `enter` - sets the entry time
+ - `leave` - sets the exit time
+ - `duration` - sets the duration (i.e., sets `leave` to `enter` + `duration`)
+ - `ease` - takes four numbers, `x1 y1 x2 y2`. These define a cubic bezier for the motion of the element over the page.
+ - `opacity-easing` - takes eight numbers, `x1 y1 x2 y2 x3 y3 x4 y4`. The first four define an easing curve for the object to fade in over its lifespan, the second for for it to fade out. Alternatively, provide only `x1 y1 x2 y2`, which will then represent the entire easing curve.
+
+For `enter` and `leave`, instead of specifying a number (to specify a global scroll `vh` at which point the element should enter/leave by), you can also use the following:
+
+ - `after-entry {id} {amount}` - shorthand for whatever the entry time of the element with id `{id}` is, plus `{amount}` (which can also be negative)
+ - `after-exit {id} {amount}` - shorthand for whatever the leave time of the element with id `{id}` is, plus `{amount}` (which can also be negative)
+ - `with-entry {id}` - shorthand for `after-entry {id} 0`
+ - `with-exit {id}` - shorthand for `after-exit {id} 0`
+
+For _all_ properties, including `enter` and `leave`, you can also use `like {id}`, which copies the value of said property in `{id}`. For instance, `<div id="second-elem" scroll-data="duration like first-elem">` will set the duration of `second-elem` to the same as that of `first-elem`.
+
+### `!absolute` mode
+
+Beginning your `scroll-data` entry with `!absolute` will enter a special mode for overriding the default behaviour 
+(i.e., scrolling from bottom to top), whereby you can use the two additional directives, `x` and `y`. Possible values for these are:
+
+ - `like {id}`, cloning the `x`/`y` value of element `id`
+ - A single number, to represent a fixed position of the element on the screen (in `vh`/`vw`)
+ - A list of numbers, to move between over the course of the element's lifetime. For instance, if four values are specified and `duration 200` is set, then the element will take `50vh` of scrolling to animate between them.
+ - A list of numbers and an easing function to use when transitioning between them, in the format `{value-1} {value-2} {...} {value-n} | x1 y1 x2 y2 |`. Similar to above, but allows you to specify a custom easing function.
+ - Fully manual control, specifying positions, easing functions, _and_ setting custom/varied durations for each stage (as opposed to assigning each position/transition equal time). The format for this is repeated sequences of:
+
+```
+[time]: [start-pos]? - [end-pos] | [x1] [y1] [x2] [y2] |
+```
+
+ - `time` represents the time the movement should finish by. **Note that this is relative** to the lifetime of the event, so `0` here is whatever `enter` is for the element.
+   - This can be a number or the format `+{number}`, which autofills with the previous value plus an amount.
+ - `start-pos` and `end-pos` may be numeric values or `like` clauses (but this will only work if the referenced element has a corresponding `x`/`y` which is a _single-number_ value)
+   - `start-pos` may be omitted, in which case it will autofill to the `end-pos` of the previous spec
+ - The easing function is defined as with `ease` above.

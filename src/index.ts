@@ -54,6 +54,7 @@ export default class Scrollomat {
     private entries: ScrollInstruction[];
     private scrollPlaceholder?: HTMLDivElement;
     private maxHeight: number = 100;
+    private currentScrollDistance: number = 0;
 
     constructor(canvas: HTMLElement) {
         this.canvas = canvas;
@@ -78,7 +79,7 @@ export default class Scrollomat {
         return (t: number) => `${100 - Scrollomat.computeBezier(
             t,
             ...easingCurve,
-        ) * (100 + entry.element.getBoundingClientRect().height / window.innerHeight * 100)}vh`;
+        ) * (101 + entry.element.getBoundingClientRect().height / window.innerHeight * 100)}vh`;
     }
 
     loadCanvas() {
@@ -108,14 +109,14 @@ export default class Scrollomat {
     }
 
     update() {
-        const currentScrollDistance = Math.min(
+        this.currentScrollDistance = Math.min(
             this.maxHeight,
             (-this.scrollPlaceholder!.getBoundingClientRect().top) / window.innerHeight * 100 + 100
         );
 
         this.compilationResult?.forEach(instruction => {
             if (instruction.isAbsolute) {
-                if (instruction.enterAt > currentScrollDistance || currentScrollDistance > instruction.leaveAt) {
+                if (instruction.enterAt > this.currentScrollDistance || this.currentScrollDistance > instruction.leaveAt) {
                     instruction.element.style.display = 'none';
                     return;
                 } else {
@@ -123,7 +124,7 @@ export default class Scrollomat {
                 }
             }
 
-            const offset = (currentScrollDistance - instruction.enterAt) / instruction.duration;
+            const offset = (this.currentScrollDistance - instruction.enterAt) / instruction.duration;
             instruction.element.style.top = instruction.scrollListeners.yEasingFunction(offset);
             instruction.element.style.left = instruction.scrollListeners.xEasingFunction(offset);
             instruction.element.style.opacity = instruction.scrollListeners.opacityEasingFunction(offset);
@@ -485,12 +486,7 @@ export default class Scrollomat {
 
                                 return;
                             } else {
-                                // pattern: ( number | +number | (relation identifier) ): [( number | (like identifier)
-                                // )] - ( number | (like identifier) ) | ((number number number number) | like
-                                // identifier) | time  | +offset |            time        : [      fixed start pos
-                                //    ] -           end pos              |                       easing
-                                //      |
-
+// pattern: ( number | +number | (relation identifier) ): [( number | (like identifier) )] - ( number | (like identifier) ) | ((number number number number) |
                                 /*
                                     [
                             1            +?
